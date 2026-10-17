@@ -1,0 +1,14 @@
+{
+  "baseUrl": "https://forum.ripper.store",
+  "giftCategoryId": null,
+  "lookbackPages": 3,
+  "previewsPerTopic": 2,
+  "downloadDirect": true,
+  "maxFileMB": 200,
+  "dailyBudgetMB": 500,
+  "maxHidelinksPerTopic": 12,
+  "onlyWithLinks": true,
+  "flareSolverrUrl": "http://localhost:8191",
+  "username": "",
+  "password": ""
+}

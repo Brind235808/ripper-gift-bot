@@ -1,0 +1,19 @@
+{
+  "name": "ripper-gift-bot",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Daily archiver/downloader for the gift section of forum.ripper.store (FlareSolverr + Cloudflare aware)",
+  "scripts": {
+    "setup": "node src/setup.js",
+    "discover": "node src/discover.js",
+    "gallery": "node src/generate-gallery.js",
+    "pick": "node src/download-selected.js --choices latest",
+    "daily": "node src/discover.js",
+    "dryrun": "node src/fetch.js",
+    "selftest": "node src/selftest.js"
+  },
+  "dependencies": {
+    "playwright-core": "^1.64.1"
+  }
+}
