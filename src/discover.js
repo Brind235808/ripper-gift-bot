@@ -44,13 +44,22 @@ function saveGallery(g) {
 }
 
 function collectTopicStruct(raw, baseUrl) {
-  const posts = (raw.posts || []).map((p) => ({
-    pid: p.pid,
-    user: p.user?.username || 'unknown',
-    timestamp: p.timestamp ? new Date(p.timestamp).toISOString() : null,
-    html: p.content || '',
-    text: htmlToText(p.content || ''),
-  }));
+  const posts = (raw.posts || []).map((p) => {
+    const rawHtml = p.content || '';
+    const html = rawHtml
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&amp;/g, '&')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'");
+    return {
+      pid: p.pid,
+      user: p.user?.username || 'unknown',
+      timestamp: p.timestamp ? new Date(p.timestamp).toISOString() : null,
+      html,
+      text: htmlToText(html),
+    };
+  });
   const boothLinks = [];
   const salesLinks = [];
   const links = new Map();
