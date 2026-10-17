@@ -68,12 +68,12 @@ function collectTopicStruct(raw, baseUrl) {
     for (const l of extractLinks(p.html, baseUrl)) {
       if (isForumAsset(l.url, baseUrl)) continue;
       if (!links.has(l.url)) links.set(l.url, { url: l.url, post: p.user });
-      if (/booth\.pm\/en?\/items\/\d+/i.test(l.url)) {
+      if (/booth\.pm\/(en?\/)?items\/\d+/i.test(l.url)) {
         const clean = l.url.replace(/\?.*$/, '');
         if (!boothLinks.includes(clean)) boothLinks.push(clean);
       }
       // Detect sales platform links
-      if (/payhip\.com\/b\/|gumroad\.com\/l\/|itch\.io\/|lemonsqueezy\.com/i.test(l.url)) {
+      if (/payhip\.com\/b\/|gumroad\.com\/l\/|itch\.io\/|lemonsqueezy\.com|jinxxy\.com\//i.test(l.url)) {
         if (!salesLinks.includes(l.url)) salesLinks.push(l.url);
       }
     }

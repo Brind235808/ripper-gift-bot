@@ -613,7 +613,7 @@ export function extractInlinePreviews(html, baseUrl) {
     try { u = new URL(u, baseUrl).href; } catch { continue; }
     if (BAD_HOST_RE.test(u)) continue;
     if (TINY_EMOJI_EXTS.some((ext) => u.includes(ext))) continue;
-    if (!(PREVIEW_HOST_RE.test(u) || /forum\.ripper\.store\/uploads\/files/.test(u))) continue;
+    if (!(PREVIEW_HOST_RE.test(u) || /forum\.ripper\.store\/(assets\/)?uploads\/files/.test(u))) continue;
     if (set.has(u)) continue;
     set.set(u, stripBoothSize(u));
   }
