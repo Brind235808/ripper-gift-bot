@@ -51,24 +51,46 @@ function card(t) {
     ? `<div class="pw">🔑 ${pwLine}</div>`
     : `<div class="pw pw-soft">_(未识别到密码)_</div>`;
 
-  return `
-    <label class="topic-card" data-tid="${t.tid}">
-      <div class="head">
-        <input type="checkbox" class="pick">
-        <div class="meta">
-          <div class="title"><a href="${t.url || `https://forum.ripper.store/topic/${t.tid}`}" target="_blank" onclick="event.stopPropagation()">${t.title.replace(/[<>&]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]))}</a></div>
-          <div class="sub">
-            tid ${t.tid} · ${new Date(t.created || t.discoveredAt).toLocaleString('zh-CN')}
-            ${booth ? `· <a href="${booth}" target="_blank" onclick="event.stopPropagation()">booth</a>` : ''}
-          </div>
-          ${pwHtml}
+  const postsHtml = (t.posts || []).length
+    ? `<div class="posts-section">
+        <button class="posts-toggle" onclick="event.stopPropagation(); this.parentElement.classList.toggle('expanded')">
+          <span class="toggle-icon">▼</span> 查看原帖内容 (${t.posts.length} 楼)
+        </button>
+        <div class="posts-content">
+          ${t.posts.map((p, idx) => `
+            <div class="post-item">
+              <div class="post-header">
+                <span class="post-user">#${idx + 1} ${p.user}</span>
+                ${p.timestamp ? `<span class="post-time">${new Date(p.timestamp).toLocaleString('zh-CN')}</span>` : ''}
+              </div>
+              <div class="post-body">${p.html || '<em>(无内容)</em>'}</div>
+            </div>
+          `).join('')}
         </div>
-      </div>
-      <div class="previews">${previewsHtml}</div>
-      ${archives}
-      ${direct.length ? `<div class="direct">直链文件：${direct.map((l) => `<code>${path.basename(new URL(l.url).pathname)}</code>`).join(' · ')}</div>` : ''}
-      ${other.length ? `<div class="other">其他链接：${other.map((l) => `<code>${new URL(l.url).hostname}</code>`).join(' · ')}</div>` : ''}
-    </label>`;
+      </div>`
+    : '';
+
+  return `
+    <div class="topic-card" data-tid="${t.tid}">
+      <label class="card-label">
+        <div class="head">
+          <input type="checkbox" class="pick" onclick="event.stopPropagation()">
+          <div class="meta">
+            <div class="title"><a href="${t.url || `https://forum.ripper.store/topic/${t.tid}`}" target="_blank" onclick="event.stopPropagation()">${t.title.replace(/[<>&]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]))}</a></div>
+            <div class="sub">
+              tid ${t.tid} · ${new Date(t.created || t.discoveredAt).toLocaleString('zh-CN')}
+              ${booth ? `· <a href="${booth}" target="_blank" onclick="event.stopPropagation()">booth</a>` : ''}
+            </div>
+            ${pwHtml}
+          </div>
+        </div>
+        <div class="previews">${previewsHtml}</div>
+        ${archives}
+        ${direct.length ? `<div class="direct">直链文件：${direct.map((l) => `<code>${path.basename(new URL(l.url).pathname)}</code>`).join(' · ')}</div>` : ''}
+        ${other.length ? `<div class="other">其他链接：${other.map((l) => `<code>${new URL(l.url).hostname}</code>`).join(' · ')}</div>` : ''}
+      </label>
+      ${postsHtml}
+    </div>`;
 }
 
 function build(g) {
@@ -93,24 +115,25 @@ function build(g) {
   .toolbar { display:flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
   .toolbar button { padding: 6px 14px; border-radius: 6px; border: 1px solid #334155; background: var(--panel); color: var(--ink); cursor: pointer; font-size: 13px; }
   .toolbar button.primary { background: var(--accent); color: #0c4a6e; border:none; font-weight: 600; }
-  main { padding: 0 24px 120px; column-count: 1; column-gap: 16px; }
-  @media(min-width: 780px) { main { column-count: 2; } }
-  @media(min-width: 1200px) { main { column-count: 3; } }
-  .topic-card { display:block; break-inside: avoid; margin-bottom: 16px; border: 1px solid #334155; border-radius: 12px; overflow: hidden; background: var(--card); cursor: pointer; transition: border-color .15s; }
+  main { padding: 0 24px 120px; display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 16px; }
+  .topic-card { display:flex; flex-direction:column; border: 1px solid #334155; border-radius: 12px; overflow: hidden; background: var(--card); transition: border-color .15s; min-height: 400px; }
   .topic-card:hover { border-color: #475569; }
   .topic-card.picked { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(56,189,248,.15); }
+  .card-label { display:flex; flex-direction:column; flex:1; cursor: pointer; }
   .head { padding: 12px 14px; display:flex; gap: 10px; border-bottom: 1px solid #1e293b; }
-  .head input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--accent); cursor: pointer; }
-  .meta .title { font-weight: 600; font-size: 14px; line-height: 1.35; }
+  .head input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--accent); cursor: pointer; flex-shrink:0; }
+  .meta { flex:1; min-width:0; }
+  .meta .title { font-weight: 600; font-size: 14px; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
   .meta .sub { font-size: 11px; color: var(--soft); margin-top: 4px; }
   .meta .sub a { color: var(--accent); text-decoration: none; }
   .pw { font-size: 12px; margin-top: 6px; }
   .pw-soft { color: var(--soft); }
-  .previews { padding: 6px 6px 10px; display:flex; gap: 6px; flex-wrap: wrap; }
+  .previews { padding: 6px 6px 10px; display:flex; gap: 6px; flex-wrap: wrap; flex-shrink:0; }
   .previews .pv { margin:0; width: calc(50% - 3px); border-radius: 6px; overflow:hidden; background:#00000033; }
-  .previews .pv img { width: 100%; display:block; }
+  .previews .pv img { width: 100%; height: 120px; object-fit:cover; display:block; }
   .previews .pv figcaption { font-size: 10px; padding: 2px 6px; color: var(--soft); background: #00000040; }
   .previews .pv:nth-child(1):last-child { width: 100%; }
+  .previews .pv:nth-child(1):last-child img { height: 180px; }
   .previews .empty { width: 100%; color: var(--soft); font-size: 12px; padding: 8px 10px; font-style: italic; }
   .archive { padding: 10px 14px; border-top: 1px dashed #334155; font-size: 12px; }
   .archive-total { color: var(--soft); font-size: 11px; margin-top: 2px; }
@@ -118,6 +141,26 @@ function build(g) {
   .archive-list li { margin: 1px 0; }
   .direct, .other { padding: 0 14px 10px; font-size: 12px; color: var(--soft); }
   .direct code, .other code { background: #00000033; padding: 1px 6px; border-radius: 4px; color: #e2e8f0; }
+  .posts-section { border-top: 1px solid #334155; }
+  .posts-toggle { width: 100%; padding: 10px 14px; background: #1e293b; border: none; color: var(--ink); cursor: pointer; font-size: 13px; text-align: left; display: flex; align-items: center; gap: 6px; transition: background .15s; }
+  .posts-toggle:hover { background: #334155; }
+  .toggle-icon { font-size: 10px; transition: transform .2s; display: inline-block; }
+  .posts-section.expanded .toggle-icon { transform: rotate(180deg); }
+  .posts-content { max-height: 0; overflow: hidden; transition: max-height .3s ease-out; background: #0f172a; }
+  .posts-section.expanded .posts-content { max-height: 2000px; overflow-y: auto; }
+  .post-item { padding: 12px 14px; border-bottom: 1px solid #1e293b; }
+  .post-item:last-child { border-bottom: none; }
+  .post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .post-user { font-size: 12px; font-weight: 600; color: var(--accent); }
+  .post-time { font-size: 11px; color: var(--soft); }
+  .post-body { font-size: 13px; line-height: 1.6; color: #cbd5e1; word-break: break-word; }
+  .post-body img { max-width: 100%; height: auto; border-radius: 6px; margin: 8px 0; }
+  .post-body a { color: var(--accent); text-decoration: none; }
+  .post-body a:hover { text-decoration: underline; }
+  .post-body code { background: #00000033; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+  .post-body pre { background: #00000033; padding: 10px; border-radius: 6px; overflow-x: auto; margin: 8px 0; }
+  .post-body pre code { background: none; padding: 0; }
+  .post-body blockquote { border-left: 3px solid #475569; padding-left: 12px; margin: 8px 0; color: var(--soft); }
   #floating { position: fixed; bottom: 20px; right: 20px; display:flex; gap: 10px; z-index: 98; }
   #count { color: var(--accent); font-weight: 600; font-size: 13px; }
 </style>
@@ -145,7 +188,21 @@ const updateCount = () => {
   countEl.textContent = \`已选 \${n}\`;
   cards.forEach(c => c.classList.toggle('picked', c.querySelector('input:checked')));
 };
-cards.forEach(c => c.addEventListener('click', (e) => { if (e.target.tagName !== 'A' && e.target.tagName !== 'INPUT') c.querySelector('input').click(); updateCount(); }));
+cards.forEach(c => {
+  const label = c.querySelector('.card-label');
+  if (label) {
+    label.addEventListener('click', (e) => {
+      if (e.target.tagName !== 'A' && e.target.tagName !== 'INPUT' && !e.target.closest('.posts-section')) {
+        c.querySelector('input').click();
+        updateCount();
+      }
+    });
+  }
+  const checkbox = c.querySelector('input[type="checkbox"]');
+  if (checkbox) {
+    checkbox.addEventListener('change', updateCount);
+  }
+});
 document.getElementById('all').onclick = () => { cards.forEach(c => c.querySelector('input').checked = true); updateCount(); };
 document.getElementById('none').onclick = () => { cards.forEach(c => c.querySelector('input').checked = false); updateCount(); };
 let onlyHost = false;

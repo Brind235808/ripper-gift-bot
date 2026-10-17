@@ -217,6 +217,7 @@ async function main() {
       slug: t.slug,
       forumUrl: t.url,
       created: t.created,
+      posts: t.posts,
       passwords: t.passwords.map((x) => ({ value: x.value, post: x.post })),
       boothLinks: t.boothLinks,
       salesLinks: t.salesLinks,
