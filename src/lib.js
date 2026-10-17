@@ -175,7 +175,7 @@ async function autoLogin(baseUrl, username, password) {
 }
 
 // Playwright-based login for Turnstile CAPTCHA.
-async function loginWithPlaywright(baseUrl, username, password) {
+export async function loginWithPlaywright(baseUrl, username, password) {
   const { chromium } = await import('playwright-core');
 
   // Use launch (not persistent) to avoid Edge singleton conflicts

@@ -8,6 +8,7 @@ import path from 'node:path';
 import {
   ROOT, loadConfig, initSession, closeSession, api,
 } from './lib.js';
+import { loginWithPlaywright } from './lib.js';
 
 const CONFIG = loadConfig();
 
@@ -17,12 +18,26 @@ async function main() {
   try {
     me = await initSession(CONFIG);
   } catch (e) {
-    console.error('× FlareSolverr 初始化失败:', e.message);
-    console.log('\n请确认：');
-    console.log('  1. FlareSolverr 已安装到 tools/FlareSolverr/ 或正在运行');
-    console.log('  2. 默认监听 http://localhost:8191');
-    console.log('  3. 下载地址: https://github.com/FlareSolverr/FlareSolverr/releases');
-    process.exit(1);
+    // If no credentials configured, try manual login
+    if (e.message.includes('未配置自动登录')) {
+      console.log('\n未配置自动登录凭据，启动手动登录流程...');
+      console.log('将打开浏览器窗口，请手动登录论坛');
+      try {
+        await loginWithPlaywright(CONFIG.baseUrl, '', '');
+        console.log('√ 手动登录完成，重新初始化会话...');
+        me = await initSession(CONFIG);
+      } catch (loginErr) {
+        console.error('× 手动登录失败:', loginErr.message);
+        process.exit(1);
+      }
+    } else {
+      console.error('× FlareSolverr 初始化失败:', e.message);
+      console.log('\n请确认：');
+      console.log('  1. FlareSolverr 已安装到 tools/FlareSolverr/ 或正在运行');
+      console.log('  2. 默认监听 http://localhost:8191');
+      console.log('  3. 下载地址: https://github.com/FlareSolverr/FlareSolverr/releases');
+      process.exit(1);
+    }
   }
 
   if (me?.uid) {
